@@ -1,6 +1,7 @@
 import os
 import csv
 import random
+import colorConversion
 
 from PIL import Image
 from os import listdir
@@ -40,6 +41,7 @@ def fileKey(folderName,k):
         writer.writerows(dataset)
 
 def createDataset(fileModelKey):
+    count = 0
     for model in range(10):
         dataset = []
         print("Start Shadow Model " + str(model))
@@ -51,10 +53,13 @@ def createDataset(fileModelKey):
                 key = row[2]
                 if key[model] == "1":
                     with Image.open(filename) as im:
-                        pixels = list(im.convert("L").resize((64,64)).getdata())
+                        pixels = list(im.convert("P").resize((64,64)).getdata())
                         row = [label] + pixels
                         dataset.append(row)
-        with open("shadowTrainingSet_" + str(model) + ".csv", "w", newline='') as outputfile:
+                count += 1
+                if (count % 1000) == 0:
+                    print(count)
+        with open("shadowTrainingPaletteSet_" + str(model) + ".csv", "w", newline='') as outputfile:
             writer = csv.writer(outputfile)
             writer.writerows(dataset)
 
