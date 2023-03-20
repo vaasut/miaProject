@@ -1,6 +1,8 @@
 import csv
 from PIL import Image
-from sklearn import svm
+from sklearn.linear_model import RidgeClassifier
+from joblib import dump
+from joblib import load
 
 def trainModel(trainingData):
     with open(trainingData, newline='') as csvfile:
@@ -9,7 +11,7 @@ def trainModel(trainingData):
         reader = csv.reader(csvfile)
         count = 0
         for row in reader:
-            if (count % 10) == 0:
+            if (count % 1) == 0:
                 labels.append(int(row[0]))
                 values = []
                 for i in range(len(row)-1):
@@ -18,16 +20,26 @@ def trainModel(trainingData):
             count += 1
         print(trainingSet)
         print(labels)
-        clfSVM = svm.LinearSVC(C=0.1).fit(trainingSet,labels)
-        return clfSVM
+        classifierModel = RidgeClassifier().fit(trainingSet,labels)
+        return classifierModel
 
-def testModel(model,filename):
+def testModel(model, filename):
     with Image.open(filename) as im:
         pixels = list(im.convert("P").resize((64,64)).getdata())
         prediction = model.predict([pixels])
+        print(model.decision_function([pixels]))
     return prediction
 
-filename = "artbench-10-imagefolder-split/test/baroque/abraham-storck_italianate-park-landscape.jpg"
-model = trainModel("shadowTrainingPaletteSet_0.csv")
-prediction = testModel(model,filename)
+def saveModel(model, filename):
+    dump(model, filename)
+
+def loadModel(modelFile):
+    model = load(modelFile)
+    return model
+
+filename = "artbench-10-imagefolder-split/test/post_impressionism/anita-malfatti_pedras-na-praia.jpg"
+model = trainModel("shadowTrainingSet_0.csv")
+saveModel(model,"myModel.joblib")
+model = loadModel("myModel.joblib")
+prediction = testModel(model, filename)
 print(prediction)

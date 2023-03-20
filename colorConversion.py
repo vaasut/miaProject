@@ -1,5 +1,7 @@
 import csv
 import math
+import os
+
 from PIL import Image
 
 def getColorDistance(colorOne,colorTwo):
@@ -47,9 +49,26 @@ def convertBackToImage(pixels,colorKey):
     image_out.show()
 
 # colorKey = getColorKey("colorKey.csv")
-filename = "artbench-10-imagefolder-split/train/art_nouveau/a-y-jackson_algoma-in-november-1935.jpg"
-with Image.open(filename) as im:
-    im.resize((64,64)).show()
-    im.convert("L").resize((64,64)).show()
+# filename = "artbench-10-imagefolder-split/train/art_nouveau/a-y-jackson_algoma-in-november-1935.jpg"
+# with Image.open(filename) as im:
+#     im.resize((64,64)).show()
+#     im.convert("L").resize((64,64)).show()
 # pixels = convertImageColor(filename,colorKey)
 # convertBackToImage(pixels,colorKey)
+
+def resizeImages(folderName):
+    count = 0
+    labels = ["art_nouveau", "baroque", "expressionism", "impressionism", "post_impressionism", "realism",
+                "renaissance", "romanticism", "surrealism", "ukiyo_e"]
+    for label in labels:
+        print("Starting Resize of " + label)
+        files = os.listdir(folderName + label + "/")
+        for file in files:
+            with Image.open(folderName + label + "/" + file) as im:
+                imResize = im.resize((128,128))
+                imResize.save(folderName + label + "/" + file, "JPEG",quality=90)
+            if (count % 1000) == 0:
+                print(count)
+            count += 1
+
+# resizeImages("artbench-10-imagefolder-split/test/")
