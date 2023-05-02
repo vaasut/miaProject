@@ -37,9 +37,9 @@ def loadModel(modelFile):
     model = load(modelFile)
     return model
 
-filename = "artbench-10-imagefolder-split/test/post_impressionism/anita-malfatti_pedras-na-praia.jpg"
-model = trainModel("shadowTrainingSet_0.csv")
-saveModel(model,"myModel.joblib")
+filename = "artbench-10-imagefolder-split/train/art_nouveau/leon-bakst_elisium-1906.jpg"
+# model = trainModel("shadowTrainingSet_0.csv")
+# saveModel(model,"myModel.joblib")
 model = loadModel("myModel.joblib")
 prediction = testModel(model, filename)
 print(prediction)

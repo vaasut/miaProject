@@ -58,15 +58,14 @@ def convertBackToImage(pixels,colorKey):
 
 def resizeImages(folderName):
     count = 0
-    labels = ["art_nouveau", "baroque", "expressionism", "impressionism", "post_impressionism", "realism",
-                "renaissance", "romanticism", "surrealism", "ukiyo_e"]
+    labels = ["art_nouveau", "expressionism", "post_impressionism", "realism", "surrealism", "ukiyo_e"]
     for label in labels:
         print("Starting Resize of " + label)
         files = os.listdir(folderName + label + "/")
         for file in files:
             with Image.open(folderName + label + "/" + file) as im:
-                imResize = im.resize((128,128))
-                imResize.save(folderName + label + "/" + file, "JPEG",quality=90)
+                imResize = im.resize((64,64))
+                imResize.save(folderName + label + "/" + file, "JPEG",quality=95)
             if (count % 1000) == 0:
                 print(count)
             count += 1

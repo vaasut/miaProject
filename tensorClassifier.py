@@ -1,9 +1,12 @@
+import os
+import random
 from os import mkdir
 
 import matplotlib.pyplot as plt
 import numpy as np
 import PIL
 import tensorflow as tf
+from numpy import mean
 
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -11,9 +14,9 @@ from tensorflow.keras.models import Sequential
 
 def buildModel():
   batch_size = 32
-  img_height = 128
-  img_width = 128
-  data_dir = "artbench-10-imagefolder-split/test"
+  img_height = 64
+  img_width = 64
+  data_dir = "artbench-10-imagefolder-split-two/train_two"
 
   train_ds = tf.keras.utils.image_dataset_from_directory(
     data_dir,
@@ -53,6 +56,7 @@ def buildModel():
     layers.MaxPooling2D(),
     layers.Conv2D(64, 3, padding='same', activation='relu'),
     layers.MaxPooling2D(),
+    layers.Dropout(0.2),
     layers.Flatten(),
     layers.Dense(128, activation='relu'),
     layers.Dense(num_classes)
@@ -64,13 +68,13 @@ def buildModel():
 
   model.summary()
 
-  epochs=5
+  epochs=15
   model.fit(
     train_ds,
     validation_data=val_ds,
     epochs=epochs
   )
-  model.save('saved_model/myTensorFlowModel')
+  model.save('saved_model/myTensorFlowClassifierModelMiniDropoutTwoNewWithout')
 
   # history.save('saved_model/myTensorFlowModel')
   # acc = history.history['accuracy']
@@ -95,29 +99,6 @@ def buildModel():
   # plt.title('Training and Validation Loss')
   # plt.show()
 
-def loadModel():
-  new_model = tf.keras.models.load_model('saved_model/myTensorFlowModel')
-  return new_model
 
-# buildModel()
-def getScore(model,img_array):
-  # sunflower_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/592px-Red_sunflower.jpg"
-  # sunflower_path = tf.keras.utils.get_file('Red_sunflower', origin=sunflower_url)
-  #
-  # img = tf.keras.utils.load_img(
-  #     sunflower_path, target_size=(128, 128)
-  # )
-  # img_array = tf.keras.utils.img_to_array(img)
-  # print(len(img_array[0][0]))
-  img_array = tf.expand_dims(img_array, 0) # Create a batch
+buildModel()
 
-  predictions = model.predict(img_array)
-  score = tf.nn.softmax(predictions[0])
-  return score
-#
-# print(
-#     "This image most likely belongs to {} with a {:.2f} percent confidence."
-#     .format(class_names[np.argmax(score)], 100 * np.max(score))
-# )
-# model = loadModel()
-# getScore(model,"hi")
