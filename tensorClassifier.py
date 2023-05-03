@@ -12,11 +12,11 @@ from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
-def buildModel():
+def buildModel(dataDirectory,modelDirectory):
   batch_size = 32
   img_height = 64
   img_width = 64
-  data_dir = "artbench-10-imagefolder-split-two/train_two"
+  data_dir = dataDirectory
 
   train_ds = tf.keras.utils.image_dataset_from_directory(
     data_dir,
@@ -74,7 +74,8 @@ def buildModel():
     validation_data=val_ds,
     epochs=epochs
   )
-  model.save('saved_model/myTensorFlowClassifierModelMiniDropoutTwoNewWithout')
+
+  model.save(modelDirectory)
 
   # history.save('saved_model/myTensorFlowModel')
   # acc = history.history['accuracy']
@@ -100,5 +101,5 @@ def buildModel():
   # plt.show()
 
 
-buildModel()
+
 
