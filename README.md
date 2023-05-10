@@ -6,6 +6,8 @@ It's important to note that none of the training or test images are in this gith
 - Modified Artbench Dataset (2-Classes with some images removed): https://drive.google.com/file/d/1jyXkkE9wGJ0l1rWL60zkFiy5352jWxmQ/view?usp=sharing
 - Art from Specific Artists: https://drive.google.com/file/d/1TWGnnYKDiMnzw18KbnLy-nGCCLpMA68U/view?usp=sharing
 
+Unzip them and place them inside the project directory. You will get an error stating that the files are not able to be found if you have them in the wrong location. You can modify the directory variables to fix this, but it will be easier if you just make sure the folders are within the project directory.
+
 When you're testing my code, I would recommend looking most closely at the code in EvaluateTensorClassifier.py and in createShadowModels.py. These two files contain the important code that I wrote for Parts 2 and 3 of my project, relating to prediction-correctness, prediction-confidence, and shadow training to attack a binary classifier. 
 
 The files, colorConversion.py, fileModelKey.py, generateColorImage.py, and generateImage.py have functions relating to trying to train shadow models to work for a GAN. The files RidgeClassifier.py, tensorClassifier.py, and tensorGan.py contain code based on tutorials built in functions.
