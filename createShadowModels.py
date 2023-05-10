@@ -111,8 +111,6 @@ def readVectorsFromFile(filename, c):
             if len(vector) == 3 and vector[0] == c:
                 labels.append(int(num%2000/1000))
                 vectors.append(vector)
-            else:
-                print(num)
             num += 1
     return vectors, labels
 
@@ -126,7 +124,7 @@ def getTestImages(folderName,n):
 
 def attackTargetModel(imageSet):
     vectors = []
-    model = loadModel('saved_model/myTensorFlowClassifierModelMiniTwoNew')
+    model = loadModel('saved_model/myTensorFlowClassifierModelDropoutMiniTwoNew')
     for file_url in imageSet:
         try:
             vector = []

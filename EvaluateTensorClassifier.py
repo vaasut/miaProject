@@ -41,10 +41,14 @@ def getScore(model,directory):
   print(confusionMatrix)
 
 
-# nouveau = ["/in-training/anna", "/in-training/henri", "/in-training/zinaida", "/not-in-training/benois", "/not-in-training/leon",
-#  "/not-in-training/virginia"]
-# ukiyo = ["/in-training/hishikawa","/in-training/isoda","/in-training/okumura","/not-in-training/hasegawa","/not-in-training/kubo","/not-in-training/yashima"]
-# model = loadModel('saved_model/myTensorFlowClassifierModelMiniTwoNewWithout')
-# for artist in ukiyo:
-#   print(artist)
-#   getScore(model,"specificArtists" + artist)
+nouveau = ["/in-training/anna", "/in-training/henri", "/in-training/zinaida", "/not-in-training/benois", "/not-in-training/leon", "/not-in-training/virginia"]
+ukiyo = ["/in-training/hishikawa","/in-training/isoda","/in-training/okumura","/not-in-training/hasegawa","/not-in-training/kubo","/not-in-training/yashima"]
+
+def evaluateArtists(artType):
+  model = loadModel('saved_model/myTensorFlowClassifierModelMiniTwoNew')
+  for artist in artType:
+    print(artist)
+    getScore(model,"specificArtists" + artist)
+
+if __name__ == "__main__":
+  evaluateArtists(nouveau)
