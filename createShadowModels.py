@@ -15,41 +15,44 @@ from tensorClassifier import buildModel
 
 def createShadowModelTrainingSets(n,folderName):
     for i in range(n):
-        newDirectory = "shadowModelSets/model" + str(i) + "/train"
+        newDirectory = "biggerShadowModelSets/model" + str(i) + "/train"
         keywords = ["art_nouveau", "ukiyo_e"]
         for label in range(len(keywords)):
             os.makedirs(newDirectory + "/" + keywords[label])
             imageDirectory = folderName + "/" + keywords[label]
             files = os.listdir(imageDirectory)
             random.shuffle(files)
-            files = files[0:25]
+            files = files[0:500]
             for file in files:
                 shutil.copy(imageDirectory + "/" + file,newDirectory + "/" + keywords[label] + '/' + file)
             # print(files)
 
 def createShadowModelTestingSets(n,folderName):
     for i in range(n):
-        newDirectory = "shadowModelSets/model" + str(i) + "/test"
+        newDirectory = "biggerShadowModelSets/model" + str(i) + "/test"
         keywords = ["art_nouveau", "ukiyo_e"]
         for label in range(len(keywords)):
             os.makedirs(newDirectory + "/" + keywords[label])
             imageDirectory = folderName + "/" + keywords[label]
             files = os.listdir(imageDirectory)
             random.shuffle(files)
-            files = files[0:25]
+            files = files[0:500]
             for file in files:
                 shutil.copy(imageDirectory + "/" + file,newDirectory + "/" + keywords[label] + '/' + file)
             # print(files)
 
-folderName = "artbench-10-imagefolder-split-two/test_two"
-# createShadowModelTrainingSets(200,folderName)
-# createShadowModelTestingSets(200,folderName)
+def buildDataSet():
+    folderName = "artbench-10-imagefolder-split-two/train_two"
+    createShadowModelTrainingSets(10,folderName)
+    folderName = "artbench-10-imagefolder-split-two/test_two"
+    createShadowModelTestingSets(10,folderName)
+
 def buildShadowModels(n):
     for i in range(n):
         print("Building Model: " + str(i))
-        buildModel("shadowModelSets/model" + str(i) + "/train","shadowModels/model" + str(i))
+        buildModel("biggerShadowModelSets/model" + str(i) + "/train","biggerShadowModels/model" + str(i))
 
-# buildShadowModels(200)
+# buildShadowModels(10)
 
 def createShadowModelVectors(n):
     classLabels = ["art_nouveau", "ukiyo_e"]
@@ -58,16 +61,16 @@ def createShadowModelVectors(n):
     for i in range(n):
         print(i)
         for j in range(2):
-            labels.append(j)
+            # labels.append(j)
             if j == 0:
                 folder = "test"
             else:
                 folder = "train"
-            vector = []
-            for artClass in classLabels:
-                model = loadModel('shadowModels/model' + str(i))
-                directory = "shadowModelSets/model" + str(i) + "/" + folder + "/" + artClass
+            for artClass in range(len(classLabels)):
+                model = loadModel('biggerShadowModels/model' + str(i))
+                directory = "biggerShadowModelSets/model" + str(i) + "/" + folder + "/" + classLabels[artClass]
                 for filename in os.listdir(directory):
+                    vector = []
                     try:
                       file_url = directory + "/" + filename
                       img = tf.keras.utils.load_img(file_url, target_size=(64, 64))
@@ -75,10 +78,19 @@ def createShadowModelVectors(n):
                       img_array = tf.expand_dims(img_array, 0) # Create a batch
                       predictions = model.predict(img_array)
                       score = np.array(tf.nn.softmax(predictions[0]))
+                      vector.append(artClass)
                       vector.append(score[0])
-                    except:
+                      vector.append(score[1])
+                      # if artClass == "art_nouveau":
+                      #   vector.append(score[0])
+                      # else:
+                      #   vector.append(score[1])
+                      vectors.append(vector)
+                      labels.append(j)
+                    except Exception as e:
+                        print(e)
                         continue
-            vectors.append(vector)
+
     return labels, vectors
 
 def writeVectorsToFile(vectors,filename):
@@ -86,8 +98,9 @@ def writeVectorsToFile(vectors,filename):
         writer = csv.writer(f)
         writer.writerows(vectors)
 
-def readVectorsFromFile(filename):
+def readVectorsFromFile(filename, c):
     vectors = []
+    labels = []
     with open(filename) as f:
         reader = csv.reader(f)
         num = 0
@@ -95,23 +108,13 @@ def readVectorsFromFile(filename):
             vector = []
             for i in row:
                 vector.append(float(i))
-            if len(vector) == 50:
+            if len(vector) == 3 and vector[0] == c:
+                labels.append(int(num%2000/1000))
                 vectors.append(vector)
             else:
                 print(num)
             num += 1
-    return vectors
-
-def readLabelsFromFile(filename):
-    labels = []
-    with open(filename) as f:
-        reader = csv.reader(f)
-        for row in reader:
-          for i in range(len(row)):
-              if i != 85:
-                labels.append(int(i)%2)
-    return labels
-
+    return vectors, labels
 
 def getTestImages(folderName,n):
     """ Function returns an array of n random image names from the given folder."""
@@ -122,31 +125,41 @@ def getTestImages(folderName,n):
     return [folderName + "/" + i for i in testImages]
 
 def attackTargetModel(imageSet):
-    vector = []
+    vectors = []
     model = loadModel('saved_model/myTensorFlowClassifierModelMiniTwoNew')
     for file_url in imageSet:
         try:
+            vector = []
             img = tf.keras.utils.load_img(file_url, target_size=(64, 64))
             img_array = tf.keras.utils.img_to_array(img)
             img_array = tf.expand_dims(img_array, 0) # Create a batch
             predictions = model.predict(img_array)
             score = np.array(tf.nn.softmax(predictions[0]))
+            vector.append(1)
             vector.append(score[0])
+            vector.append(score[1])
+            vectors.append(vector)
         except:
             continue
-    return vector
+    return vectors
 
-# labels,vectors = createShadowModelVectors(200)
-# writeVectorsToFile(vectors,"vectorFile.csv")
-# writeVectorsToFile(labels,"labelFile.csv")
-vectors = np.matrix(readVectorsFromFile("vectorFile.csv"))
-labels = readLabelsFromFile("labelFile.csv")
-print(vectors)
-classifierModel = RidgeClassifier(n_neighbors=10)
-classifierModel.fit(vectors,labels)
-testImages = getTestImages("specificArtists/in-training/okumura",50)
-vector = attackTargetModel(testImages)
-# print(vector)
-prediction = classifierModel.predict_proba([vector])
-print(prediction)
-# saveModel(classifierModel,"myAttackModel.joblib")
+def writeAttackDatasetToFile():
+    labels,vectors = createShadowModelVectors(10)
+    print(vectors)
+    writeVectorsToFile(vectors,"vectorFileBiggerModels.csv")
+    writeVectorsToFile([labels],"labelFileBiggerModels.csv")
+
+def getAttackModelResults(testImagesDirectory,csplit):
+    vectors, labels = readVectorsFromFile("vectorFileFull.csv",csplit)
+    print(np.matrix(vectors))
+    print(labels)
+    classifierModel = KNeighborsClassifier(n_neighbors=3)
+    classifierModel.fit(vectors,labels)
+    testImages = getTestImages(testImagesDirectory,200)
+    vectors = attackTargetModel(testImages)
+    prediction = classifierModel.predict(vectors)
+    print(prediction)
+    print(sum(prediction))
+    print(len(prediction))
+
+getAttackModelResults("artbench-10-imagefolder-split-two/train_two/ukiyo_e",1)
